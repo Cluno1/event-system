@@ -1,3 +1,13 @@
+/*
+ * @Author: zld 17875477802@163.com
+ * @Date: 2025-07-04 12:28:32
+ * @LastEditors: zld 17875477802@163.com
+ * @LastEditTime: 2025-07-15 10:48:22
+ * @FilePath: \event-system\build\plugins.ts
+ * @Description: 
+ * 
+ * Copyright (c) 2025 by ${git_name_email}, All Rights Reserved. 
+ */
 import { cdn } from "./cdn";
 import vue from "@vitejs/plugin-vue";
 import { viteBuildInfo } from "./info";
