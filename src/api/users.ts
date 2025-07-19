@@ -11,15 +11,6 @@
 import { http } from "@/utils/http";
 import type { Result } from "./api";
 
-export interface User {
-  id?: number;
-  account?: string;
-  name?: string;
-  description?: string;
-  disable?: number;
-  createTime?: number;
-}
-
 export const getUsersAll = () => {
-  return http.request<Result<User[]>>("get", "http://localhost:3001/user/all");
+  return http.request<Result<User[]>>("get", "/user/all");
 };

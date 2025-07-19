@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { hasAuth, getAuths } from "@/router/utils";
+import { defineOptions } from "vue";
 
 defineOptions({
   name: "PermissionButtonRouter"

@@ -38,37 +38,40 @@ const { title } = useNav();
 
 const ruleForm = reactive({
   username: "admin",
-  password: "admin123"
+  password: "123123"
 });
 
 const onLogin = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(valid => {
-    if (valid) {
-      loading.value = true;
-      useUserStoreHook()
-        .loginByUsername({
-          username: ruleForm.username,
-          password: ruleForm.password
-        })
-        .then(res => {
-          if (res.success) {
-            // 获取后端路由
-            return initRouter().then(() => {
-              disabled.value = true;
-              router
-                .push(getTopMenu(true).path)
-                .then(() => {
-                  message("登录成功", { type: "success" });
-                })
-                .finally(() => (disabled.value = false));
-            });
-          } else {
-            message("登录失败", { type: "error" });
-          }
-        })
-        .finally(() => (loading.value = false));
-    }
+    console.log("valid?:", valid);
+
+    // if (valid) {
+
+    loading.value = true;
+    useUserStoreHook()
+      .loginByUsername({
+        username: ruleForm.username,
+        password: ruleForm.password
+      })
+      .then(res => {
+        // 获取后端路由
+        return initRouter().then(() => {
+          disabled.value = true;
+          router
+            .push(getTopMenu(true).path)
+            .then(() => {
+              message("登录成功", { type: "success" });
+            })
+            .finally(() => (disabled.value = false));
+        });
+      })
+      .catch(err => {
+        console.log(err, "err login");
+        message("登录失败", { type: "error" });
+      })
+      .finally(() => (loading.value = false));
+    // }
   });
 };
 

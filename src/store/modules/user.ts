@@ -11,13 +11,16 @@ import {
   type UserResult,
   type RefreshTokenResult,
   getLogin,
-  refreshTokenApi
+  refreshTokenApi,
+  logout
 } from "@/api/user";
 import { useMultiTagsStoreHook } from "./multiTags";
 import { type DataInfo, setToken, removeToken, userKey } from "@/utils/auth";
 
 export const useUserStore = defineStore("pure-user", {
   state: (): userType => ({
+    // id
+    id: storageLocal().getItem<DataInfo<number>>(userKey)?.id ?? 0,
     // 头像
     avatar: storageLocal().getItem<DataInfo<number>>(userKey)?.avatar ?? "",
     // 用户名
@@ -35,6 +38,9 @@ export const useUserStore = defineStore("pure-user", {
     loginDay: 7
   }),
   actions: {
+    SET_ID(id: number) {
+      this.id = id;
+    },
     /** 存储头像 */
     SET_AVATAR(avatar: string) {
       this.avatar = avatar;
@@ -64,12 +70,26 @@ export const useUserStore = defineStore("pure-user", {
       this.loginDay = Number(value);
     },
     /** 登入 */
-    async loginByUsername(data) {
+    async loginByUsername(data: object) {
       return new Promise<UserResult>((resolve, reject) => {
         getLogin(data)
           .then(data => {
-            if (data?.success) setToken(data.data);
-            resolve(data);
+            if (data.code == 200) {
+              const d = data.data as UserResult;
+              // Set token information
+              const tokenData: DataInfo<Date> = {
+                accessToken: d.accessToken,
+                refreshToken: d.refreshToken,
+                expires: d.expiresIn,
+                avatar: d.avatar,
+                username: d.account,
+                nickname: d.name,
+                roles: d.roles,
+                permissions: d.permissions
+              };
+              setToken(tokenData);
+              resolve(d);
+            }
           })
           .catch(error => {
             reject(error);
@@ -77,23 +97,37 @@ export const useUserStore = defineStore("pure-user", {
       });
     },
     /** 前端登出（不调用接口） */
-    logOut() {
+    async logOut() {
       this.username = "";
+
       this.roles = [];
       this.permissions = [];
       removeToken();
       useMultiTagsStoreHook().handleTags("equal", [...routerArrays]);
       resetRouter();
+      await logout({ id: this.id || 0 });
+      this.id = 0;
       router.push("/login");
     },
     /** 刷新`token` */
-    async handRefreshToken(data) {
+    async handRefreshToken(data: object) {
       return new Promise<RefreshTokenResult>((resolve, reject) => {
         refreshTokenApi(data)
           .then(data => {
-            if (data) {
-              setToken(data.data);
-              resolve(data);
+            if (data.code === 200) {
+              const d = data.data as RefreshTokenResult;
+              const tokenData: DataInfo<Date> = {
+                accessToken: d.accessToken,
+                refreshToken: d.refreshToken,
+                expires: d.expiresIn,
+                avatar: this.avatar,
+                username: this.username,
+                nickname: this.nickname,
+                roles: this.roles,
+                permissions: this.permissions
+              };
+              setToken(tokenData);
+              resolve(d);
             }
           })
           .catch(error => {

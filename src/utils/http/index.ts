@@ -72,8 +72,10 @@ class PureHttp {
           PureHttp.initConfig.beforeRequestCallback(config);
           return config;
         }
+
         /** 请求白名单，放置一些不需要`token`的接口（通过设置请求白名单，防止`token`过期后再请求造成的死循环问题） */
         const whiteList = ["/refresh-token", "/login"];
+
         return whiteList.some(url => config.url.endsWith(url))
           ? config
           : new Promise(resolve => {
@@ -156,14 +158,18 @@ class PureHttp {
       method,
       url,
       ...param,
-      ...axiosConfig
+      ...axiosConfig,
+      baseURL: import.meta.env.VITE_BASE_URL
     } as PureHttpRequestConfig;
+
+    console.log(config, "this is config");
 
     // 单独处理自定义请求/响应回调
     return new Promise((resolve, reject) => {
       PureHttp.axiosInstance
         .request(config)
         .then((response: undefined) => {
+          console.log(response, "PureHttp,axiosInstance,request, then:");
           resolve(response);
         })
         .catch(error => {
