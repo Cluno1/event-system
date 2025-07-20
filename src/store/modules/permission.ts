@@ -32,6 +32,7 @@ export const usePermissionStore = defineStore("pure-permission", {
       this.flatteningRoutes = formatFlatteningRoutes(
         this.constantMenus.concat(routes) as any
       );
+      console.log(this.wholeMenus, "整体路由生成的菜单");
     },
     cacheOperate({ mode, name }: cacheType) {
       const delIndex = this.cachePageList.findIndex(v => v === name);
