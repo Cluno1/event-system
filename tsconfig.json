@@ -32,6 +32,7 @@
     },
     "types": [
       "node",
+      "vue",
       "vite/client",
       "element-plus/global",
       "@pureadmin/table/volar",

@@ -1,3 +1,13 @@
+/*
+ * @Author: zld 17875477802@163.com
+ * @Date: 2025-07-04 12:28:32
+ * @LastEditors: zld 17875477802@163.com
+ * @LastEditTime: 2025-07-19 10:02:59
+ * @FilePath: \event-system\types\index.d.ts
+ * @Description:
+ *
+ * Copyright (c) 2025 by ${git_name_email}, All Rights Reserved.
+ */
 // 此文件跟同级目录的 global.d.ts 文件一样也是全局类型声明，只不过这里存放一些零散的全局类型，无需引入直接在 .vue 、.ts 、.tsx 文件使用即可获得类型提示
 /**
  * 后端返回的用户类型数据
@@ -7,9 +17,40 @@ interface User {
   avatar: string;
   account: string;
   name: string;
+  /**
+   * 权限角色
+   */
   roles: string[];
+  /**
+   * 所有权限 (独有权限+权限角色的权限)
+   */
   permissions: string[];
-  menuRoles: string[];
+  /**
+   * 该角色独有权限
+   */
+  uniPermissions: string[];
+  /**
+   * 菜单角色
+   */
+  menuRoles?: string[];
+  createTime?: Date;
+  /**
+   * 描述
+   */
+  description?: string;
+  /**
+   * 禁用
+   */
+  disable?: number;
+  /**
+   * 是否逻辑删除
+   */
+  is_delete?: number;
+  delete_time?: Date;
+  /**
+   * 让token失效
+   */
+  token_version?: number;
 }
 
 type RefType<T> = T | null;
