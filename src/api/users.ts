@@ -2,7 +2,7 @@
  * @Author: zld 17875477802@163.com
  * @Date: 2025-07-14 17:12:46
  * @LastEditors: zld 17875477802@163.com
- * @LastEditTime: 2025-07-15 11:08:57
+ * @LastEditTime: 2025-07-21 23:12:32
  * @FilePath: \event-system\src\api\users.ts
  * @Description:
  *
@@ -10,7 +10,20 @@
  */
 import { http } from "@/utils/http";
 import type { Result } from "./api";
+import type { AxiosRequestConfig } from "axios";
 
-export const getUsersAll = () => {
-  return http.request<Result<User[]>>("get", "/user/all");
+interface UsersAll {
+  users: User[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export const getUsersAll = (param: { page: number; limit: number }) => {
+  return http.request<Result<UsersAll>>("get", "/user/all", {
+    param
+  } as AxiosRequestConfig<any>);
 };

@@ -2,41 +2,194 @@
  * @Author: zld 17875477802@163.com
  * @Date: 2025-07-19 09:30:56
  * @LastEditors: zld 17875477802@163.com
- * @LastEditTime: 2025-07-21 09:47:05
+ * @LastEditTime: 2025-07-22 00:37:59
  * @FilePath: \event-system\src\views\system\user\user.vue
  * @Description: 
  * 
  * Copyright (c) 2025 by ${git_name_email}, All Rights Reserved. 
 -->
+<template>
+  <div class="container mx-auto p-4">
+    <el-card class="box-card">
+      <template #header>
+        <div class="card-header">
+          <h2 class="text-xl font-semibold">用户列表</h2>
+        </div>
+      </template>
+
+      <!-- 表格 -->
+      <el-table
+        v-loading="loading"
+        :data="tableData"
+        stripe
+        style="width: 100%"
+      >
+        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column label="头像" width="100">
+          <template #default="{ row }">
+            <el-avatar :size="50" :src="row.avatar" />
+          </template>
+        </el-table-column>
+        <el-table-column prop="account" label="账号" width="120" />
+        <el-table-column prop="name" label="姓名" width="120" />
+        <el-table-column label="角色" width="150">
+          <template #default="{ row }">
+            <el-dropdown>
+              <div class="flex items-center">
+                <el-tag
+                  v-if="row.roles.length > 0"
+                  :type="row.roles[0] === 'admin' ? 'danger' : 'primary'"
+                  class="mr-1"
+                >
+                  {{ row.roles[0] }}
+                </el-tag>
+                <el-tag v-if="row.roles.length > 1"
+                  >+{{ row.roles.length - 1 }}</el-tag
+                >
+              </div>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item
+                    v-for="(role, index) in row.roles"
+                    :key="index"
+                  >
+                    {{ role }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.disable === 1 ? 'success' : 'danger'">
+              {{ row.disable === 1 ? "启用" : "禁用" }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="description" label="描述" width="120" />
+        <el-table-column label="独有权限" width="200">
+          <template #default="{ row }">
+            <el-dropdown
+              v-if="row.uniPermissions && row.uniPermissions.length > 0"
+            >
+              <div class="flex items-center">
+                <span class="truncate" style="max-width: 100px">
+                  {{ row.uniPermissions[0] }}
+                </span>
+                <el-tag v-if="row.uniPermissions.length > 1" class="ml-1">
+                  +{{ row.uniPermissions.length - 1 }}
+                </el-tag>
+              </div>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item
+                    v-for="(perm, index) in row.uniPermissions"
+                    :key="index"
+                  >
+                    {{ perm }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" fixed="right">
+          <template #default="{ row }">
+            <el-button size="small" @click="handleEdit(row)">编辑</el-button>
+            <el-button size="small" type="danger" @click="handleDelete(row)">
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 分页 -->
+      <div class="mt-4 flex justify-center">
+        <el-pagination
+          v-model:current-page="currentPage"
+          v-model:page-size="pageSize"
+          :page-sizes="[10, 20, 30, 50]"
+          :small="false"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
+    </el-card>
+  </div>
+</template>
 <script setup lang="ts">
 import { getUsersAll } from "@/api/users";
-import { defineOptions, onMounted } from "vue";
+import { onMounted, ref } from "vue";
+interface UserListParams {
+  page: number;
+  limit: number;
+}
 
-defineOptions({
-  name: "User"
-});
-console.log("....user");
-onMounted(async () => {
-  const a = await getUsersAll();
-  console.log(a, "a");
+const loading = ref(false);
+const tableData = ref<User[]>([]);
+const currentPage = ref(1);
+const pageSize = ref(10);
+const total = ref(0);
+
+// 获取用户列表
+const fetchUserList = async () => {
+  try {
+    loading.value = true;
+    const params: UserListParams = {
+      page: currentPage.value,
+      limit: pageSize.value
+    };
+    const res = await getUsersAll(params);
+    if (res.success) {
+      console.log("res:", res);
+      tableData.value = res.data?.users as User[];
+
+      total.value = res.data?.meta?.total || res?.data?.users.length || 0;
+    }
+  } catch (error) {
+    console.error("获取用户列表失败:", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 分页大小改变
+const handleSizeChange = (val: number) => {
+  pageSize.value = val;
+  fetchUserList();
+};
+
+// 当前页改变
+const handleCurrentChange = (val: number) => {
+  currentPage.value = val;
+  fetchUserList();
+};
+
+// 编辑用户
+const handleEdit = (row: User) => {
+  console.log("编辑用户:", row);
+  // 这里可以打开编辑对话框
+};
+
+// 删除用户
+const handleDelete = (row: User) => {
+  console.log("删除用户:", row);
+  // 这里可以弹出确认对话框
+};
+
+onMounted(() => {
+  fetchUserList();
 });
 </script>
 
-<template>
-  <div>
-    <p class="mb-2!">
-      模拟后台根据不同角色返回对应路由，观察左侧菜单变化（管理员角色可查看系统管理菜单、普通角色不可查看系统管理菜单）
-    </p>
-    <p class="mb-2!">
-      模拟后台根据不同角色返回对应路由，观察左侧菜单变化（管理员角色可查看系统管理菜单、普通角色不可查看系统管理菜单）
-    </p>
-    <p class="mb-2!">
-      模拟后台根据不同角色返回对应路由，观察左侧菜单变化（管理员角色可查看系统管理菜单、普通角色不可查看系统管理菜单）
-    </p>
-    <p class="mb-2!">
-      模拟后台根据不同角色返回对应路由，观察左侧菜单变化（管理员角色可查看系统管理菜单、普通角色不可查看系统管理菜单）
-    </p>
-  </div>
-</template>
-
-<style lang="scss" scoped></style>
+<style scoped>
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+</style>

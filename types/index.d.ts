@@ -48,7 +48,7 @@ interface User {
   is_delete?: number;
   delete_time?: Date;
   /**
-   * 让token失效
+   * 让token失效(token迭代的版本)
    */
   token_version?: number;
 }
