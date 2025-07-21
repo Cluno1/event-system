@@ -44,14 +44,14 @@ const ruleForm = reactive({
 const onLogin = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(valid => {
-    console.log("valid?:", valid);
+    console.log("valid?:", valid, "user:-->", ruleForm.username);
 
     // if (valid) {
 
     loading.value = true;
     useUserStoreHook()
       .loginByUsername({
-        username: ruleForm.username,
+        account: ruleForm.username,
         password: ruleForm.password
       })
       .then(res => {

@@ -2,21 +2,23 @@
  * @Author: zld 17875477802@163.com
  * @Date: 2025-07-19 09:30:56
  * @LastEditors: zld 17875477802@163.com
- * @LastEditTime: 2025-07-21 00:02:02
- * @FilePath: \event-system\src\views\system\user\index.vue
+ * @LastEditTime: 2025-07-21 09:47:05
+ * @FilePath: \event-system\src\views\system\user\user.vue
  * @Description: 
  * 
  * Copyright (c) 2025 by ${git_name_email}, All Rights Reserved. 
 -->
 <script setup lang="ts">
+import { getUsersAll } from "@/api/users";
 import { defineOptions, onMounted } from "vue";
 
 defineOptions({
   name: "User"
 });
 console.log("....user");
-onMounted(() => {
-  // getalluser;
+onMounted(async () => {
+  const a = await getUsersAll();
+  console.log(a, "a");
 });
 </script>
 
