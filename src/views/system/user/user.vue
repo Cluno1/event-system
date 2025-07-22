@@ -2,7 +2,7 @@
  * @Author: zld 17875477802@163.com
  * @Date: 2025-07-19 09:30:56
  * @LastEditors: zld 17875477802@163.com
- * @LastEditTime: 2025-07-22 00:37:59
+ * @LastEditTime: 2025-07-22 12:55:56
  * @FilePath: \event-system\src\views\system\user\user.vue
  * @Description: 
  * 
@@ -67,7 +67,13 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="description" label="描述" width="120" />
+
+        <el-table-column
+          header-align="center"
+          prop="description"
+          label="描述"
+          width="120"
+        />
         <el-table-column label="独有权限" width="200">
           <template #default="{ row }">
             <el-dropdown
@@ -95,6 +101,36 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
+        <el-table-column prop="createTime" label="创建时间" width="120" />
+        <el-table-column label="菜单角色" width="80">
+          <template #default="{ row }">
+            <el-dropdown>
+              <div class="flex items-center">
+                <el-tag
+                  v-if="row.menuRoles.length > 0"
+                  :type="row.menuRoles[0] === 'system' ? 'danger' : 'primary'"
+                  class="mr-1"
+                >
+                  {{ row.menuRoles[0] }}
+                </el-tag>
+                <el-text v-if="row.menuRoles.length <= 0">-</el-text>
+                <el-tag v-if="row.menuRoles.length > 1"
+                  >+{{ row.menuRoles.length - 1 }}</el-tag
+                >
+              </div>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item
+                    v-for="(mrole, index) in row.menuRoles"
+                    :key="index"
+                  >
+                    {{ mrole }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="handleEdit(row)">编辑</el-button>
@@ -108,10 +144,11 @@
       <!-- 分页 -->
       <div class="mt-4 flex justify-center">
         <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
+          :current-page="currentPage"
+          :page-size="pageSize"
           :page-sizes="[10, 20, 30, 50]"
           :small="false"
+          background
           layout="total, sizes, prev, pager, next, jumper"
           :total="total"
           @size-change="handleSizeChange"
