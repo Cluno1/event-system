@@ -2,7 +2,7 @@
  * @Author: zld 17875477802@163.com
  * @Date: 2025-07-19 09:30:56
  * @LastEditors: zld 17875477802@163.com
- * @LastEditTime: 2025-07-22 12:55:56
+ * @LastEditTime: 2025-07-23 14:52:53
  * @FilePath: \event-system\src\views\system\user\user.vue
  * @Description: 
  * 
@@ -24,7 +24,7 @@
         stripe
         style="width: 100%"
       >
-        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column prop="id" label="ID" width="50" />
         <el-table-column label="头像" width="100">
           <template #default="{ row }">
             <el-avatar :size="50" :src="row.avatar" />
@@ -62,12 +62,12 @@
         </el-table-column>
         <el-table-column label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.disable === 1 ? 'success' : 'danger'">
+            <el-tag v-if="row.isDelete === 1" type="danger"> 删除 </el-tag>
+            <el-tag v-else :type="row.disable === 1 ? 'success' : 'danger'">
               {{ row.disable === 1 ? "启用" : "禁用" }}
             </el-tag>
           </template>
         </el-table-column>
-
         <el-table-column
           header-align="center"
           prop="description"
@@ -102,6 +102,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" width="120" />
+        <el-table-column prop="deleteTime" label="删除时间" width="120" />
         <el-table-column label="菜单角色" width="80">
           <template #default="{ row }">
             <el-dropdown>
@@ -133,7 +134,7 @@
         </el-table-column>
         <el-table-column label="操作" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" @click="handleEdit(row)">编辑</el-button>
+            <el-button size="small" @click="handleEdit(row)">修改</el-button>
             <el-button size="small" type="danger" @click="handleDelete(row)">
               删除
             </el-button>
@@ -158,8 +159,10 @@
     </el-card>
   </div>
 </template>
-<script setup lang="ts">
-import { getUsersAll } from "@/api/users";
+<script setup lang="tsx">
+import { getUsersAll, updateUserByPermi } from "@/api/users";
+import { addDialog } from "@/components/ReDialog";
+import { message } from "@/utils/message";
 import { onMounted, ref } from "vue";
 interface UserListParams {
   page: number;
@@ -216,6 +219,32 @@ const handleEdit = (row: User) => {
 const handleDelete = (row: User) => {
   console.log("删除用户:", row);
   // 这里可以弹出确认对话框
+  addDialog({
+    title: row.account,
+    contentRenderer: () => <p>是否删除(逻辑)用户?</p>, // jsx 语法 （注意在.vue文件启用jsx语法，需要在script开启lang="tsx"）
+    beforeSure: async (done: () => void, { closeLoading }: any) => {
+      // closeLoading() // 关闭确定按钮动画，不关闭弹框
+      // done() // 关闭确定按钮动画并关闭弹框
+      const res = await updateUserByPermi({
+        account: row.account,
+        isDelete: 1,
+        deleteTime: new Date()
+      });
+      if (res.success) {
+        tableData.value = tableData.value.map((_: User) => {
+          if (_.account === res.data?.account) {
+            return res.data;
+          } else {
+            return _;
+          }
+        });
+        message("删除成功", { type: "success" });
+      } else {
+        message("操作失败", { type: "error" });
+      }
+      done();
+    }
+  });
 };
 
 onMounted(() => {

@@ -45,12 +45,12 @@ interface User {
   /**
    * 是否逻辑删除
    */
-  is_delete?: number;
-  delete_time?: Date;
+  isDelete?: number;
+  deleteTime?: Date;
   /**
    * 让token失效(token迭代的版本)
    */
-  token_version?: number;
+  tokenVersion?: number;
 }
 
 type RefType<T> = T | null;
